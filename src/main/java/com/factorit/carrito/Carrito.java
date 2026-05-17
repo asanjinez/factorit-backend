@@ -12,5 +12,5 @@ import lombok.Setter;
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
 public class Carrito extends FactoritEntity {
-    private boolean isSpecial;
+    private boolean special;
 }

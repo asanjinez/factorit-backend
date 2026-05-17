@@ -1,0 +1,15 @@
+package com.factorit.compra.dto;
+
+import java.math.BigDecimal;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class CompraItemResponse {
+    private String nombre;
+    private BigDecimal precioUnitario;
+    private Integer cantidad;
+}
