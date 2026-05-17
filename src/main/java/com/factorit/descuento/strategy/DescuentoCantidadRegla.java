@@ -11,7 +11,7 @@ import com.factorit.descuento.TipoDescuento;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DescuentoCantidadRegla implements ReglaDescuento {
+public class DescuentoCantidadRegla implements IReglaDescuento {
 
     private static final int CANTIDAD_MINIMA_DESCUENTO = 3;
     private static final BigDecimal DESCUENTO_CARRITO_COMUN = BigDecimal.valueOf(100);

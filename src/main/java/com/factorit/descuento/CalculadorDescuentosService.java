@@ -4,15 +4,15 @@ import com.factorit.carrito.Carrito;
 import java.math.BigDecimal;
 import java.util.List;
 
-import com.factorit.descuento.strategy.ReglaDescuento;
+import com.factorit.descuento.strategy.IReglaDescuento;
 import org.springframework.stereotype.Service;
 
 @Service
 public class CalculadorDescuentosService {
 
-    private final List<ReglaDescuento> reglas;
+    private final List<IReglaDescuento> reglas;
 
-    public CalculadorDescuentosService(List<ReglaDescuento> reglas) {
+    public CalculadorDescuentosService(List<IReglaDescuento> reglas) {
         this.reglas = reglas;
     }
 

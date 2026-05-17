@@ -16,10 +16,8 @@ import com.factorit.descuento.DescuentoAplicado;
 import com.factorit.descuento.DescuentoResponse;
 import com.factorit.descuento.ParametrosDescuento;
 import com.factorit.descuento.ResultadoDescuentos;
-import com.factorit.exception.CarritoItemNotFoundException;
-import com.factorit.exception.CarritoNotFoundException;
-import com.factorit.exception.CheckoutInvalidException;
-import com.factorit.exception.ProductoInvalidException;
+import com.factorit.exception.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -151,6 +149,10 @@ public class CarritoServiceImpl implements ICarritoService {
         if (req == null || req.getDni() == null || req.getDni().isBlank()) {
             throw new CheckoutInvalidException("DNI is required");
         }
+        if (req.getDni() == null || !req.getDni().matches("\\d{8}")) {
+            throw new DniInvalidException();
+        }
+
     }
 
     private ItemCompra toItemCompra(CarritoItem carritoItem) {

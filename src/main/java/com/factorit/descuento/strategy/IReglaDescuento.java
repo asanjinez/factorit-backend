@@ -5,7 +5,7 @@ import com.factorit.descuento.ParametrosDescuento;
 
 import java.util.List;
 
-public interface ReglaDescuento {
+public interface IReglaDescuento {
 
     List<DescuentoAplicado> aplicar(ParametrosDescuento parametros);
 }

@@ -5,6 +5,8 @@ import com.factorit.compra.dto.CompraResponse;
 import com.factorit.descuento.DescuentoResponse;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import com.factorit.exception.DniInvalidException;
 import org.springframework.data.domain.Sort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,17 +26,29 @@ public class CompraServiceImpl implements ICompraService {
 
     @Override
     public List<CompraResponse> findByDni(String dni, Sort sort) {
+        vlidateDni(dni);
+
         return compraRepository.findByClienteDni(dni, sort).stream().map(this::toResponse).toList();
+    }
+
+    private static void vlidateDni(String dni) {
+        if (dni == null || !dni.matches("\\d{8}")) {
+            throw new DniInvalidException();
+        }
     }
 
     @Override
     public List<CompraResponse> findByDniFrom(String dni, LocalDateTime from, Sort sort) {
+        vlidateDni(dni);
+
         return compraRepository.findByClienteDniAndFechaGreaterThanEqual(dni, from, sort)
                 .stream().map(this::toResponse).toList();
     }
 
     @Override
     public List<CompraResponse> findByDniPeriod(String dni, LocalDateTime from, LocalDateTime to, Sort sort) {
+        vlidateDni(dni);
+
         return compraRepository.findByClienteDniAndFechaBetween(dni, from, to, sort)
                 .stream().map(this::toResponse).toList();
     }

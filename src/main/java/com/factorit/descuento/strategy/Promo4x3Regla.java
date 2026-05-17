@@ -12,7 +12,7 @@ import com.factorit.descuento.TipoDescuento;
 import org.springframework.stereotype.Component;
 
 @Component
-public class Promo4x3Regla implements ReglaDescuento {
+public class Promo4x3Regla implements IReglaDescuento {
 
     private static final int CANTIDAD_PROMO_4X3 = 4;
 

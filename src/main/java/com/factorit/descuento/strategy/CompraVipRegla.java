@@ -13,7 +13,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 @Component
-public class CompraVipRegla implements ReglaDescuento {
+public class CompraVipRegla implements IReglaDescuento {
 
     private static final BigDecimal MONTO_MINIMO_MENSUAL_VIP = BigDecimal.valueOf(5000);
     private static final BigDecimal MONTO_MINIMO_COMPRA_VIP = BigDecimal.valueOf(2000);
