@@ -17,6 +17,8 @@ import com.factorit.exception.ProductoInvalidException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Stream;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -68,6 +70,11 @@ public class CarritoServiceImpl implements ICarritoService {
         }
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<CarritoResponse> findAll() {
+        return carritoRepository.findAll().stream().map(this::toResponse).toList();
+    }
     @Override
     @Transactional(readOnly = true)
     public CarritoResponse findById(Long id) {

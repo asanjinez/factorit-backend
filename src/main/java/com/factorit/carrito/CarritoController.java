@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/carritos")
 public class CarritoController {
@@ -41,6 +43,10 @@ public class CarritoController {
         carritoService.deleteItem(id, itemId);
     }
 
+    @GetMapping
+    public List<CarritoResponse> findAll() {
+        return carritoService.findAll();
+    }
     @GetMapping("/{id}")
     public CarritoResponse findById(@PathVariable Long id) {
         return carritoService.findById(id);

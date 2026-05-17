@@ -4,6 +4,7 @@ import com.factorit.compra.dto.CompraItemResponse;
 import com.factorit.compra.dto.CompraResponse;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.data.domain.Sort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,24 +17,24 @@ public class CompraServiceImpl implements ICompraService {
     private ICompraRepository compraRepository;
 
     @Override
-    public List<CompraResponse> findAll() {
-        return compraRepository.findAll().stream().map(this::toResponse).toList();
+    public List<CompraResponse> findAll(Sort sort) {
+        return compraRepository.findAll(sort).stream().map(this::toResponse).toList();
     }
 
     @Override
-    public List<CompraResponse> findByDni(String dni) {
-        return compraRepository.findByClienteDni(dni).stream().map(this::toResponse).toList();
+    public List<CompraResponse> findByDni(String dni, Sort sort) {
+        return compraRepository.findByClienteDni(dni, sort).stream().map(this::toResponse).toList();
     }
 
     @Override
-    public List<CompraResponse> findByDniFrom(String dni, LocalDateTime from) {
-        return compraRepository.findByClienteDniAndFechaGreaterThanEqual(dni, from)
+    public List<CompraResponse> findByDniFrom(String dni, LocalDateTime from, Sort sort) {
+        return compraRepository.findByClienteDniAndFechaGreaterThanEqual(dni, from, sort)
                 .stream().map(this::toResponse).toList();
     }
 
     @Override
-    public List<CompraResponse> findByDniPeriod(String dni, LocalDateTime from, LocalDateTime to) {
-        return compraRepository.findByClienteDniAndFechaBetween(dni, from, to)
+    public List<CompraResponse> findByDniPeriod(String dni, LocalDateTime from, LocalDateTime to, Sort sort) {
+        return compraRepository.findByClienteDniAndFechaBetween(dni, from, to, sort)
                 .stream().map(this::toResponse).toList();
     }
 
