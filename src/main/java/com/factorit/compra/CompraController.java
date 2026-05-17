@@ -1,7 +1,8 @@
 package com.factorit.compra;
 
 import com.factorit.compra.dto.CompraResponse;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -31,15 +32,15 @@ public class CompraController {
     @GetMapping("/{dni}/from")
     public List<CompraResponse> findByDniFrom(
             @PathVariable String dni,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from) {
-        return compraService.findByDniFrom(dni, from);
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from) {
+        return compraService.findByDniFrom(dni, from.atStartOfDay());
     }
 
     @GetMapping("/{dni}/periodo")
     public List<CompraResponse> findByPeriod(
             @PathVariable String dni,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to) {
-        return compraService.findByDniPeriod(dni, from, to);
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        return compraService.findByDniPeriod(dni, from.atStartOfDay(), to.atTime(LocalTime.MAX));
     }
 }

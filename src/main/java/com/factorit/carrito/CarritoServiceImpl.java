@@ -10,6 +10,10 @@ import com.factorit.compra.ICompraRepository;
 import com.factorit.compra.ItemCompra;
 import com.factorit.compra.dto.CompraItemResponse;
 import com.factorit.compra.dto.CompraResponse;
+import com.factorit.exception.CarritoItemNotFoundException;
+import com.factorit.exception.CarritoNotFoundException;
+import com.factorit.exception.CheckoutInvalidException;
+import com.factorit.exception.ProductoInvalidException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -37,40 +41,49 @@ public class CarritoServiceImpl implements ICarritoService {
 
     @Override
     public void delete(Long id) {
-        carritoRepository.deleteById(id);
+        Carrito carrito = findCarrito(id);
+        carritoRepository.delete(carrito);
     }
 
     @Override
     public CarritoResponse addItem(Long id, AgregarItemRequest req) {
-        Carrito carrito = carritoRepository.findById(id).orElseThrow();
+        validateProducto(req);
+
+        Carrito carrito = findCarrito(id);
         CarritoItem item = new CarritoItem();
         item.setProductoNombre(req.getNombre());
         item.setPrecioUnitario(req.getPrecio());
         item.setCantidad(req.getCantidad());
         carrito.getItems().add(item);
+        carritoRepository.saveAndFlush(carrito);
         return toResponse(carrito);
     }
 
     @Override
     public void deleteItem(Long id, Long itemId) {
-        Carrito carrito = carritoRepository.findById(id).orElseThrow();
+        Carrito carrito = findCarrito(id);
         boolean removed = carrito.getItems().removeIf(item -> item.getId().equals(itemId));
         if (!removed) {
-            throw new IllegalArgumentException("El item no pertenece al carrito indicado");
+            throw new CarritoItemNotFoundException();
         }
     }
 
     @Override
     @Transactional(readOnly = true)
     public CarritoResponse findById(Long id) {
-        Carrito carrito = carritoRepository.findById(id).orElseThrow();
+        Carrito carrito = findCarrito(id);
         return toResponse(carrito);
     }
 
     @Override
     public CompraResponse checkout(Long id, CheckoutRequest req) {
-        Carrito carrito = carritoRepository.findById(id).orElseThrow();
+        validateCheckout(req);
+
+        Carrito carrito = findCarrito(id);
         List<CarritoItem> carritoItems = List.copyOf(carrito.getItems());
+        if (carritoItems.isEmpty()) {
+            throw new CheckoutInvalidException("Cart is empty");
+        }
 
         BigDecimal total = carritoItems.stream()
                 .map(i -> i.getPrecioUnitario().multiply(BigDecimal.valueOf(i.getCantidad())))
@@ -90,6 +103,31 @@ public class CarritoServiceImpl implements ICarritoService {
         carritoRepository.delete(carrito);
 
         return toCompraResponse(compra, itemsCompra);
+    }
+
+    private Carrito findCarrito(Long id) {
+        return carritoRepository.findById(id).orElseThrow(CarritoNotFoundException::new);
+    }
+
+    private void validateProducto(AgregarItemRequest req) {
+        if (req == null) {
+            throw new ProductoInvalidException("Product is required");
+        }
+        if (req.getNombre() == null || req.getNombre().isBlank()) {
+            throw new ProductoInvalidException("Product name is required");
+        }
+        if (req.getPrecio() == null || req.getPrecio().compareTo(BigDecimal.valueOf(100)) <= 0) {
+            throw new ProductoInvalidException("Product price must be greater than 100");
+        }
+        if (req.getCantidad() == null || req.getCantidad() <= 0) {
+            throw new ProductoInvalidException("Product quantity must be greater than 0");
+        }
+    }
+
+    private void validateCheckout(CheckoutRequest req) {
+        if (req == null || req.getDni() == null || req.getDni().isBlank()) {
+            throw new CheckoutInvalidException("DNI is required");
+        }
     }
 
     private ItemCompra toItemCompra(CarritoItem carritoItem) {
