@@ -3,7 +3,7 @@ package com.factorit.compra;
 import com.factorit.FactoritEntity;
 import jakarta.persistence.Entity;
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,8 +14,8 @@ import lombok.Setter;
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
 public class Compra extends FactoritEntity {
-    private Long clienteDni;
-    private LocalDate fecha;
+    private String clienteDni;
+    private LocalDateTime fecha;
     private BigDecimal total;
 
 }

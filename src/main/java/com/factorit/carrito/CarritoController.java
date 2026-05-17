@@ -5,6 +5,7 @@ import com.factorit.carrito.dto.CarritoResponse;
 import com.factorit.carrito.dto.CheckoutRequest;
 import com.factorit.carrito.dto.CrearCarritoRequest;
 import com.factorit.compra.dto.CompraResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,33 +18,36 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/carritos")
 public class CarritoController {
 
+    @Autowired
+    private ICarritoService carritoService;
+
     @PostMapping
-    public CarritoResponse crear(@RequestBody CrearCarritoRequest req) {
-        return null; 
+    public CarritoResponse create(@RequestBody CrearCarritoRequest req) {
+        return carritoService.create(req);
     }
 
     @DeleteMapping("/{id}")
-    public void eliminar(@PathVariable Long id) {
-        
+    public void delete(@PathVariable Long id) {
+        carritoService.delete(id);
     }
 
     @PostMapping("/{id}/items")
-    public CarritoResponse agregarItem(@PathVariable Long id, @RequestBody AgregarItemRequest req) {
-        return null; 
+    public CarritoResponse addItem(@PathVariable Long id, @RequestBody AgregarItemRequest req) {
+        return carritoService.addItem(id, req);
     }
 
     @DeleteMapping("/{id}/items/{itemId}")
-    public void eliminarItem(@PathVariable Long id, @PathVariable Long itemId) {
-
+    public void deleteItem(@PathVariable Long id, @PathVariable Long itemId) {
+        carritoService.deleteItem(id, itemId);
     }
 
     @GetMapping("/{id}")
-    public CarritoResponse consultar(@PathVariable Long id) {
-        return null; 
+    public CarritoResponse findById(@PathVariable Long id) {
+        return carritoService.findById(id);
     }
 
     @PostMapping("/{id}/checkout")
     public CompraResponse checkout(@PathVariable Long id, @RequestBody CheckoutRequest req) {
-        return null; 
+        return carritoService.checkout(id, req);
     }
 }
