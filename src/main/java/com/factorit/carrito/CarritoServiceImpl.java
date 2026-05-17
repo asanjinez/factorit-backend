@@ -6,10 +6,15 @@ import com.factorit.carrito.dto.CarritoResponse;
 import com.factorit.carrito.dto.CheckoutRequest;
 import com.factorit.carrito.dto.CrearCarritoRequest;
 import com.factorit.compra.Compra;
+import com.factorit.compra.DescuentoCompra;
 import com.factorit.compra.ICompraRepository;
 import com.factorit.compra.ItemCompra;
 import com.factorit.compra.dto.CompraItemResponse;
 import com.factorit.compra.dto.CompraResponse;
+import com.factorit.descuento.CalculadorDescuentosService;
+import com.factorit.descuento.DescuentoAplicado;
+import com.factorit.descuento.DescuentoResponse;
+import com.factorit.descuento.ResultadoDescuentos;
 import com.factorit.exception.CarritoItemNotFoundException;
 import com.factorit.exception.CarritoNotFoundException;
 import com.factorit.exception.CheckoutInvalidException;
@@ -17,7 +22,6 @@ import com.factorit.exception.ProductoInvalidException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,6 +36,9 @@ public class CarritoServiceImpl implements ICarritoService {
 
     @Autowired
     private ICompraRepository compraRepository;
+
+    @Autowired
+    private CalculadorDescuentosService calculadorDescuentosService;
 
     @Override
     public CarritoResponse create(CrearCarritoRequest req) {
@@ -92,24 +99,27 @@ public class CarritoServiceImpl implements ICarritoService {
             throw new CheckoutInvalidException("Cart is empty");
         }
 
-        BigDecimal total = carritoItems.stream()
-                .map(i -> i.getPrecioUnitario().multiply(BigDecimal.valueOf(i.getCantidad())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        ResultadoDescuentos resultado = calculadorDescuentosService.calcular(carrito);
 
         Compra compra = new Compra();
         compra.setClienteDni(req.getDni());
         compra.setFecha(LocalDateTime.now());
-        compra.setTotal(total);
+        compra.setSubtotal(resultado.subtotal());
+        compra.setDescuentoTotal(resultado.descuentoTotal());
+        compra.setTotal(resultado.total());
 
         List<ItemCompra> itemsCompra = carritoItems.stream()
                 .map(this::toItemCompra)
                 .toList();
         compra.getItems().addAll(itemsCompra);
+        compra.getDescuentos().addAll(resultado.descuentos().stream()
+                .map(this::toDescuentoCompra)
+                .toList());
         compraRepository.save(compra);
 
         carritoRepository.delete(carrito);
 
-        return toCompraResponse(compra, itemsCompra);
+        return toCompraResponse(compra, itemsCompra, resultado.descuentos());
     }
 
     private Carrito findCarrito(Long id) {
@@ -145,21 +155,50 @@ public class CarritoServiceImpl implements ICarritoService {
         return itemCompra;
     }
 
-    private CompraResponse toCompraResponse(Compra compra, List<ItemCompra> items) {
+    private CompraResponse toCompraResponse(
+            Compra compra,
+            List<ItemCompra> items,
+            List<DescuentoAplicado> descuentos) {
         List<CompraItemResponse> itemResponses = items.stream()
                 .map(i -> new CompraItemResponse(i.getProductoNombre(), i.getPrecioUnitario(), i.getCantidad()))
                 .toList();
+        List<DescuentoResponse> descuentoResponses = descuentos.stream()
+                .map(this::toDescuentoResponse)
+                .toList();
         return new CompraResponse(compra.getId(), compra.getClienteDni(), compra.getFecha(),
-                compra.getTotal(), itemResponses);
+                compra.getSubtotal(), compra.getDescuentoTotal(), compra.getTotal(),
+                descuentoResponses, itemResponses);
     }
 
     private CarritoResponse toResponse(Carrito carrito) {
         List<CarritoItem> items = carrito.getItems();
+        ResultadoDescuentos resultado = calculadorDescuentosService.calcular(carrito);
         List<CarritoItemResponse> itemResponses = items.stream()
                 .map(i -> new CarritoItemResponse(i.getId(), i.getProductoNombre(),
                         i.getPrecioUnitario(), i.getCantidad()))
                 .toList();
-        int totalProductos = items.stream().mapToInt(CarritoItem::getCantidad).sum();
-        return new CarritoResponse(carrito.getId(), totalProductos, itemResponses);
+        List<DescuentoResponse> descuentoResponses = resultado.descuentos().stream()
+                .map(this::toDescuentoResponse)
+                .toList();
+        return new CarritoResponse(carrito.getId(), carrito.calcularCantidadProductos(), resultado.subtotal(),
+                resultado.descuentoTotal(), resultado.total(), descuentoResponses, itemResponses);
+    }
+
+    private DescuentoCompra toDescuentoCompra(DescuentoAplicado descuento) {
+        return new DescuentoCompra(
+                descuento.tipo().name(),
+                descuento.nivel().name(),
+                descuento.descripcion(),
+                descuento.monto(),
+                descuento.productoNombre());
+    }
+
+    private DescuentoResponse toDescuentoResponse(DescuentoAplicado descuento) {
+        return new DescuentoResponse(
+                descuento.tipo().name(),
+                descuento.nivel().name(),
+                descuento.descripcion(),
+                descuento.monto(),
+                descuento.productoNombre());
     }
 }
