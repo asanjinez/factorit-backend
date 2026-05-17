@@ -1,9 +1,14 @@
 package com.factorit.compra;
 
 import com.factorit.FactoritEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,4 +23,7 @@ public class Compra extends FactoritEntity {
     private LocalDateTime fecha;
     private BigDecimal total;
 
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "compra_id")
+    private List<ItemCompra> items = new ArrayList<>();
 }

@@ -1,7 +1,12 @@
 package com.factorit.carrito;
 
 import com.factorit.FactoritEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import java.util.ArrayList;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,4 +18,8 @@ import lombok.Setter;
 @NoArgsConstructor @AllArgsConstructor
 public class Carrito extends FactoritEntity {
     private boolean special;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "carrito_id")
+    private List<CarritoItem> items = new ArrayList<>();
 }

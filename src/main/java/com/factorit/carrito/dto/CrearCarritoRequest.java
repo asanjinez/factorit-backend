@@ -8,5 +8,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CrearCarritoRequest {
-    private Boolean special;
+    private boolean special;
 }
