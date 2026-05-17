@@ -14,6 +14,7 @@ import com.factorit.compra.dto.CompraResponse;
 import com.factorit.descuento.CalculadorDescuentosService;
 import com.factorit.descuento.DescuentoAplicado;
 import com.factorit.descuento.DescuentoResponse;
+import com.factorit.descuento.ParametrosDescuento;
 import com.factorit.descuento.ResultadoDescuentos;
 import com.factorit.exception.CarritoItemNotFoundException;
 import com.factorit.exception.CarritoNotFoundException;
@@ -99,11 +100,16 @@ public class CarritoServiceImpl implements ICarritoService {
             throw new CheckoutInvalidException("Cart is empty");
         }
 
-        ResultadoDescuentos resultado = calculadorDescuentosService.calcular(carrito);
+        LocalDateTime fechaCheckout = LocalDateTime.now();
+        ParametrosDescuento parametros = new ParametrosDescuento();
+        parametros.setCarrito(carrito);
+        parametros.setDni(req.getDni());
+        parametros.setFecha(fechaCheckout);
+        ResultadoDescuentos resultado = calculadorDescuentosService.calcular(parametros);
 
         Compra compra = new Compra();
         compra.setClienteDni(req.getDni());
-        compra.setFecha(LocalDateTime.now());
+        compra.setFecha(fechaCheckout);
         compra.setSubtotal(resultado.subtotal());
         compra.setDescuentoTotal(resultado.descuentoTotal());
         compra.setTotal(resultado.total());

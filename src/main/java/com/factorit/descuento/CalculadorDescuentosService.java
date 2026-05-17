@@ -17,9 +17,15 @@ public class CalculadorDescuentosService {
     }
 
     public ResultadoDescuentos calcular(Carrito carrito) {
-        BigDecimal subtotal = carrito.calcularSubtotal();
+        ParametrosDescuento parametros = new ParametrosDescuento();
+        parametros.setCarrito(carrito);
+        return calcular(parametros);
+    }
+
+    public ResultadoDescuentos calcular(ParametrosDescuento parametros) {
+        BigDecimal subtotal = parametros.getCarrito().calcularSubtotal();
         List<DescuentoAplicado> descuentos = reglas.stream()
-                .flatMap(regla -> regla.aplicar(carrito).stream())
+                .flatMap(regla -> regla.aplicar(parametros).stream())
                 .toList();
 
         BigDecimal descuentoTotal = descuentos.stream()

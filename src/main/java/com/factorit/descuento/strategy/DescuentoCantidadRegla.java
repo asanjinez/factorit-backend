@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.factorit.descuento.DescuentoAplicado;
 import com.factorit.descuento.NivelDescuento;
+import com.factorit.descuento.ParametrosDescuento;
 import com.factorit.descuento.TipoDescuento;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +18,8 @@ public class DescuentoCantidadRegla implements ReglaDescuento {
     private static final BigDecimal DESCUENTO_CARRITO_ESPECIAL = BigDecimal.valueOf(150);
 
     @Override
-    public List<DescuentoAplicado> aplicar(Carrito carrito) {
+    public List<DescuentoAplicado> aplicar(ParametrosDescuento parametros) {
+        Carrito carrito = parametros.getCarrito();
         if (carrito.calcularCantidadProductos() <= CANTIDAD_MINIMA_DESCUENTO) {
             return List.of();
         }

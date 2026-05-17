@@ -12,6 +12,7 @@ import com.factorit.compra.dto.CompraResponse;
 import com.factorit.descuento.DescuentoResponse;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -148,7 +149,85 @@ class CarritoCheckoutDescuentoTests {
         assertThat(carrito.getItems()).isEmpty();
     }
 
+    @Test
+    void checkoutVipDescuentaQuinientosCuandoLaCompraSuperaDosMilPesos() {
+        guardarCompraPrevia(DNI, "6000");
+        Long carritoId = crearCarrito(false);
+        agregarItem(carritoId, "Monitor", "2500", 1);
 
+        CompraResponse compra = carritoService.checkout(carritoId, new CheckoutRequest(DNI));
+
+        logTotal("vip con compra mayor a 2000", "2000", compra);
+        assertThat(compra.getSubtotal()).isEqualByComparingTo("2500");
+        assertThat(compra.getDescuentoTotal()).isEqualByComparingTo("500");
+        assertThat(compra.getTotal()).isEqualByComparingTo("2000");
+        assertThat(compra.getDescuentos())
+                .extracting(DescuentoResponse::tipo)
+                .containsExactly("COMPRA_VIP");
+    }
+
+    @Test
+    void checkoutVipNoDescuentaQuinientosCuandoLaCompraNoSuperaDosMilPesos() {
+        guardarCompraPrevia(DNI, "6000");
+        Long carritoId = crearCarrito(false);
+        agregarItem(carritoId, "Auriculares", "2000", 1);
+
+        CompraResponse compra = carritoService.checkout(carritoId, new CheckoutRequest(DNI));
+
+        logTotal("vip con compra igual a 2000", "2000", compra);
+        assertThat(compra.getSubtotal()).isEqualByComparingTo("2000");
+        assertThat(compra.getDescuentoTotal()).isEqualByComparingTo("0");
+        assertThat(compra.getTotal()).isEqualByComparingTo("2000");
+        assertThat(compra.getDescuentos()).isEmpty();
+    }
+
+    @Test
+    void checkoutConTodosLosDescuentosAcumulaLasPromocionesAplicables() {
+        guardarCompraPrevia(DNI, "6000");
+        Long carritoId = crearCarrito(true);
+        agregarItem(carritoId, "Mouse", "1200", 4);
+        agregarItem(carritoId, "Teclado", "1000", 1);
+
+        CompraResponse compra = carritoService.checkout(carritoId, new CheckoutRequest(DNI));
+
+        logTotal("todos los descuentos", "3950", compra);
+        assertThat(compra.getSubtotal()).isEqualByComparingTo("5800");
+        assertThat(compra.getDescuentoTotal()).isEqualByComparingTo("1850");
+        assertThat(compra.getTotal()).isEqualByComparingTo("3950");
+        assertThat(compra.getDescuentos())
+                .extracting(DescuentoResponse::tipo)
+                .containsExactlyInAnyOrder("PROMO_4X3", "DESCUENTO_CANTIDAD", "COMPRA_VIP");
+    }
+
+    @Test
+    void checkoutVipNoAplicaCuandoLasComprasDelMesNoSuperanCincoMilPesos() {
+        guardarCompraPrevia(DNI, "5000");
+        Long carritoId = crearCarrito(false);
+        agregarItem(carritoId, "Monitor", "2500", 1);
+
+        CompraResponse compra = carritoService.checkout(carritoId, new CheckoutRequest(DNI));
+
+        logTotal("vip con compras previas igual a 5000", "2500", compra);
+        assertThat(compra.getSubtotal()).isEqualByComparingTo("2500");
+        assertThat(compra.getDescuentoTotal()).isEqualByComparingTo("0");
+        assertThat(compra.getTotal()).isEqualByComparingTo("2500");
+        assertThat(compra.getDescuentos()).isEmpty();
+    }
+
+    @Test
+    void checkoutVipNoCuentaComprasDeOtroMes() {
+        guardarCompraPrevia(DNI, "6000", YearMonth.now().minusMonths(1).atDay(1).atStartOfDay());
+        Long carritoId = crearCarrito(false);
+        agregarItem(carritoId, "Monitor", "2500", 1);
+
+        CompraResponse compra = carritoService.checkout(carritoId, new CheckoutRequest(DNI));
+
+        logTotal("vip con compras previas de otro mes", "2500", compra);
+        assertThat(compra.getSubtotal()).isEqualByComparingTo("2500");
+        assertThat(compra.getDescuentoTotal()).isEqualByComparingTo("0");
+        assertThat(compra.getTotal()).isEqualByComparingTo("2500");
+        assertThat(compra.getDescuentos()).isEmpty();
+    }
 
     private Long crearCarrito(boolean special) {
         CarritoResponse carrito = carritoService.create(new CrearCarritoRequest(special));
@@ -160,9 +239,13 @@ class CarritoCheckoutDescuentoTests {
     }
 
     private void guardarCompraPrevia(String dni, String total) {
+        guardarCompraPrevia(dni, total, YearMonth.now().atDay(1).atStartOfDay());
+    }
+
+    private void guardarCompraPrevia(String dni, String total, LocalDateTime fecha) {
         Compra compra = new Compra();
         compra.setClienteDni(dni);
-        compra.setFecha(LocalDateTime.now().withDayOfMonth(1));
+        compra.setFecha(fecha);
         compra.setTotal(new BigDecimal(total));
         compraRepository.save(compra);
     }
