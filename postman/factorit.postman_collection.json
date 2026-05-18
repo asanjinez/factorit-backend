@@ -1,0 +1,289 @@
+{
+  "info": {
+    "name": "Factorit eCommerce",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "dni",
+      "value": "30111222"
+    },
+    {
+      "key": "carritoId",
+      "value": "1"
+    },
+    {
+      "key": "itemId",
+      "value": "1"
+    }
+  ],
+  "item": [
+    {
+      "name": "Carritos",
+      "item": [
+        {
+          "name": "Crear carrito comun",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"special\": false\n}"
+            },
+            "url": "{{baseUrl}}/carritos"
+          }
+        },
+        {
+          "name": "Crear carrito especial",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"special\": true\n}"
+            },
+            "url": "{{baseUrl}}/carritos"
+          }
+        },
+        {
+          "name": "Listar carritos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/carritos"
+          }
+        },
+        {
+          "name": "Consultar carrito",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/carritos/{{carritoId}}"
+          }
+        },
+        {
+          "name": "Agregar item",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Teclado mecanico\",\n  \"precio\": 2500,\n  \"cantidad\": 1\n}"
+            },
+            "url": "{{baseUrl}}/carritos/{{carritoId}}/items"
+          }
+        },
+        {
+          "name": "Agregar item 4x3",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Mouse inalambrico\",\n  \"precio\": 1200,\n  \"cantidad\": 4\n}"
+            },
+            "url": "{{baseUrl}}/carritos/{{carritoId}}/items"
+          }
+        },
+        {
+          "name": "Eliminar item",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/carritos/{{carritoId}}/items/{{itemId}}"
+          }
+        },
+        {
+          "name": "Checkout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dni\": \"{{dni}}\"\n}"
+            },
+            "url": "{{baseUrl}}/carritos/{{carritoId}}/checkout"
+          }
+        },
+        {
+          "name": "Eliminar carrito",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/carritos/{{carritoId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Compras",
+      "item": [
+        {
+          "name": "Listar compras",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/compras"
+          }
+        },
+        {
+          "name": "Listar compras por fecha desc",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/compras?sort=fecha&direction=desc"
+          }
+        },
+        {
+          "name": "Listar compras por monto asc",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/compras?sort=monto&direction=asc"
+          }
+        },
+        {
+          "name": "Compras por DNI",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/compras/{{dni}}"
+          }
+        },
+        {
+          "name": "Compras por DNI desde fecha",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/compras/{{dni}}/from?from=2026-05-01&sort=fecha&direction=asc"
+          }
+        },
+        {
+          "name": "Compras por DNI periodo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/compras/{{dni}}/periodo?from=2026-05-01&to=2026-05-31&sort=monto&direction=desc"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Errores",
+      "item": [
+        {
+          "name": "Carrito no encontrado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/carritos/999999"
+          }
+        },
+        {
+          "name": "Item no encontrado",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/carritos/{{carritoId}}/items/999999"
+          }
+        },
+        {
+          "name": "Producto invalido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Cable USB\",\n  \"precio\": 100,\n  \"cantidad\": 1\n}"
+            },
+            "url": "{{baseUrl}}/carritos/{{carritoId}}/items"
+          }
+        },
+        {
+          "name": "Checkout sin DNI",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dni\": \"\"\n}"
+            },
+            "url": "{{baseUrl}}/carritos/{{carritoId}}/checkout"
+          }
+        },
+        {
+          "name": "Checkout DNI invalido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dni\": \"12A\"\n}"
+            },
+            "url": "{{baseUrl}}/carritos/{{carritoId}}/checkout"
+          }
+        },
+        {
+          "name": "Compras DNI invalido",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/compras/12A"
+          }
+        },
+        {
+          "name": "Fecha invalida",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/compras/{{dni}}/from?from=17-05-2026"
+          }
+        }
+      ]
+    }
+  ]
+}
